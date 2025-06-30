@@ -365,7 +365,7 @@
         fetchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
         fetchBtn.disabled = true;
 
-        const response = await fetch('http://localhost:5000/api/stock-data', {
+        const response = await fetch('/api/stock-data', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ symbol, start_date: startDate, end_date: endDate })
@@ -448,7 +448,7 @@
       statsPanel.style.display = 'none';
 
       try {
-        const response = await fetch(`http://localhost:5000/api/analysis/${analysisType}`, {
+        const response = await fetch(`/api/analysis/${analysisType}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(currentStockData)
