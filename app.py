@@ -6,6 +6,7 @@ import datetime
 import numpy as np
 from sklearn.linear_model import LinearRegression
 import plotly.graph_objs as go
+import os
 
 app = Flask(__name__)
 CORS(app)
@@ -35,14 +36,13 @@ def prepare_stock_data(stock_data):
     stock_data.index = pd.to_datetime(stock_data.index)
     return stock_data
 
-# ========== ANALYSIS OF FUNCTIONS ==========
+# ========== ANALYSIS FUNCTIONS ==========
 def create_price_chart(stock_data, title):
     price_col = 'Adj Close' if 'Adj Close' in stock_data.columns else 'Close'
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(
-        x=stock_data.index.strftime('%Y-%m-%d').tolist()
-,
+        x=stock_data.index.strftime('%Y-%m-%d').tolist(),
         y=stock_data[price_col].tolist(),
         mode='lines',
         name='Stock Price',
@@ -69,7 +69,7 @@ def moving_average_analysis(stock_data):
 
     stock_data['MA50'] = stock_data[price_col].rolling(window=50).mean()
     stock_data['MA200'] = stock_data[price_col].rolling(window=200).mean()
-    stock_data = stock_data.dropna(subset=['MA50', 'MA200'])  # <-- fix NaN issue
+    stock_data = stock_data.dropna(subset=['MA50', 'MA200'])
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(
@@ -104,8 +104,7 @@ def volume_analysis(stock_data):
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(
-        x=stock_data.index.strftime('%Y-%m-%d').tolist()
-,
+        x=stock_data.index.strftime('%Y-%m-%d').tolist(),
         y=stock_data['Volume'].tolist(),
         mode='lines',
         name='Volume',
@@ -133,16 +132,14 @@ def linear_regression_analysis(stock_data):
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(
-        x=stock_data.index.strftime('%Y-%m-%d').tolist()
-,
+        x=stock_data.index.strftime('%Y-%m-%d').tolist(),
         y=prices.tolist(),
         mode='lines',
         name='Price',
         line=dict(color='#2E86AB')
     ))
     fig.add_trace(go.Scatter(
-        x=stock_data.index.strftime('%Y-%m-%d').tolist()
-,
+        x=stock_data.index.strftime('%Y-%m-%d').tolist(),
         y=trend_line.tolist(),
         mode='lines',
         name='Trend Line',
@@ -163,7 +160,7 @@ def linear_regression_analysis(stock_data):
 
     return fig.to_dict(), stats
 
-# ========== API ROUTES ==========
+# ========== ROUTES ==========
 @app.route('/')
 def dashboard():
     return render_template('index.html')
@@ -171,15 +168,25 @@ def dashboard():
 @app.route('/api/stock-data', methods=['POST'])
 def get_stock_data():
     try:
-        data = request.json
-        stock_symbol = data['symbol']
-        start_date = datetime.datetime.strptime(data['start_date'], "%Y-%m-%d")
-        end_date = datetime.datetime.strptime(data['end_date'], "%Y-%m-%d") + datetime.timedelta(days=1)
+        data = request.get_json(force=True)
+
+        stock_symbol = data.get('symbol')
+        start_date_str = data.get('start_date')
+        end_date_str = data.get('end_date')
+
+        if not stock_symbol or not start_date_str or not end_date_str:
+            return jsonify({'error': 'Missing required parameters'}), 400
+
+        start_date = datetime.datetime.strptime(start_date_str, "%Y-%m-%d")
+        end_date = datetime.datetime.strptime(end_date_str, "%Y-%m-%d")
+
+        if start_date >= end_date:
+            return jsonify({'error': 'Start date must be before end date'}), 400
 
         stock_data = yf.download(
             stock_symbol,
             start=start_date,
-            end=end_date,
+            end=end_date + datetime.timedelta(days=1),
             auto_adjust=True,
             progress=False,
             threads=True
@@ -208,7 +215,7 @@ def get_stock_data():
             'price_change': round(price_change, 2),
             'price_change_pct': round(price_change_pct, 2),
             'data_points': len(stock_data),
-            'date_range': f"{start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}"
+            'date_range': f"{start_date_str} to {end_date_str}"
         })
 
     except Exception as e:
@@ -220,15 +227,22 @@ def get_stock_data():
 @app.route('/api/analysis/<analysis_type>', methods=['POST'])
 def get_analysis(analysis_type):
     try:
-        data = request.json
-        stock_symbol = data['symbol']
-        start_date = datetime.datetime.strptime(data['start_date'], "%Y-%m-%d")
-        end_date = datetime.datetime.strptime(data['end_date'], "%Y-%m-%d") + datetime.timedelta(days=1)
+        data = request.get_json(force=True)
+
+        stock_symbol = data.get('symbol')
+        start_date_str = data.get('start_date')
+        end_date_str = data.get('end_date')
+
+        if not stock_symbol or not start_date_str or not end_date_str:
+            return jsonify({'error': 'Missing required parameters'}), 400
+
+        start_date = datetime.datetime.strptime(start_date_str, "%Y-%m-%d")
+        end_date = datetime.datetime.strptime(end_date_str, "%Y-%m-%d")
 
         stock_data = yf.download(
             stock_symbol,
             start=start_date,
-            end=end_date,
+            end=end_date + datetime.timedelta(days=1),
             auto_adjust=True,
             progress=False,
             threads=True
@@ -262,4 +276,5 @@ def get_analysis(analysis_type):
 
 # ========== MAIN ==========
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=True, host='0.0.0.0', port=port)
