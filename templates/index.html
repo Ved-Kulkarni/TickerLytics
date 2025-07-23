@@ -352,8 +352,8 @@
 
     async function fetchStockData() {
       const symbol = document.getElementById('stockSymbol').value;
-      const startDate = document.getElementById('startDate').value;
-      const endDate = document.getElementById('endDate').value;
+      const startDate = new Date(document.getElementById('startDate').value).toISOString().split('T')[0];
+      const endDate = new Date(document.getElementById('endDate').value).toISOString().split('T')[0];
 
       if (!symbol || !startDate || !endDate) {
         showError('Please fill in all fields');
