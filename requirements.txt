@@ -1,8 +1,8 @@
-Flask==2.3.3
-Flask-CORS==4.0.0
-pandas==2.1.1
-yfinance==0.2.18
-numpy==1.24.3
-scikit-learn==1.3.0
-plotly==5.15.0
+flask
+flask-cors
+pandas
+yfinance
+numpy
+scikit-learn
+plotly
 gunicorn
