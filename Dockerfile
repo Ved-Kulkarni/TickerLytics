@@ -18,4 +18,4 @@ COPY . .
 
 # The command to run the application using Gunicorn
 # Railway provides the $PORT environment variable automatically
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "app:app"]
+CMD gunicorn --bind 0.0.0.0:$PORT --workers 4 app:app
