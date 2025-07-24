@@ -1,17 +1,21 @@
-# Use official Python base image
+# Use an official lightweight Python image
 FROM python:3.10-slim
 
-# Set working directory
+# Set the working directory in the container
 WORKDIR /app
 
-# Copy project files
-COPY . .
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
-# Install dependencies
+# Copy the requirements file and install dependencies
+# This is done first to leverage Docker's layer caching
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Expose Flask port
-EXPOSE 5000
+# Copy the rest of the application code into the container
+COPY . .
 
-# Run the Flask app
-CMD ["python", "app.py"]
+# The command to run the application using Gunicorn
+# Railway provides the $PORT environment variable automatically
+CMD ["gunicorn", "--bind", "0.0.0.0:$PORT", "--workers", "4", "app:app"]
