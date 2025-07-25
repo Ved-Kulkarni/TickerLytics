@@ -404,12 +404,12 @@
 
       stockSummary.innerHTML = `
         <div class="stat-card">
-          <div class="stat-value">$${data.latest_price.toFixed(2)}</div>
+          <div class="stat-value">${data.currency}${data.latest_price.toFixed(2)}</div>
           <div class="stat-label">Latest Price</div>
         </div>
         <div class="stat-card" style="background: ${changeColor}; color: white;">
           <div class="stat-value">
-            <i class="fas ${changeIcon}"></i> $${Math.abs(data.price_change).toFixed(2)}
+            <i class="fas ${changeIcon}"></i> ${data.currency}${Math.abs(data.price_change).toFixed(2)}
           </div>
           <div class="stat-label">Price Change</div>
         </div>
