@@ -201,12 +201,15 @@ def get_stock_data():
         price_change = latest_price - stock_data[price_col].iloc[0]
         price_change_pct = (price_change / stock_data[price_col].iloc[0]) * 100 if len(stock_data) > 1 else 0
 
+        currency_symbol = "₹" if stock_symbol.upper().endswith(".NS") else "$"
+
         return jsonify({
             'success': True,
             'symbol': stock_symbol,
             'latest_price': round(latest_price, 2),
             'price_change': round(price_change, 2),
             'price_change_pct': round(price_change_pct, 2),
+            'currency': currency_symbol,
             'data_points': len(stock_data),
             'date_range': f"{start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}"
         })
