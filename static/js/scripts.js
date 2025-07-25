@@ -180,8 +180,6 @@ function hideError() {
   if (errorElement) errorElement.style.display = 'none';
 }
 
-// Set default end date to today
-document.getElementById('endDate').value = new Date().toISOString().split('T')[0];
 
 // Allow Enter key to trigger search
 document.addEventListener('keypress', function(e) {
