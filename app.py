@@ -41,8 +41,7 @@ def create_price_chart(stock_data, title):
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(
-        x=stock_data.index.strftime('%Y-%m-%d').tolist()
-,
+        x=stock_data.index.strftime('%Y-%m-%d').tolist(),
         y=stock_data[price_col].tolist(),
         mode='lines',
         name='Stock Price',
@@ -69,7 +68,7 @@ def moving_average_analysis(stock_data):
 
     stock_data['MA50'] = stock_data[price_col].rolling(window=50).mean()
     stock_data['MA200'] = stock_data[price_col].rolling(window=200).mean()
-    stock_data = stock_data.dropna(subset=['MA50', 'MA200'])  # <-- fix NaN issue
+    stock_data = stock_data.dropna(subset=['MA50', 'MA200'])
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(
@@ -104,8 +103,7 @@ def volume_analysis(stock_data):
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(
-        x=stock_data.index.strftime('%Y-%m-%d').tolist()
-,
+        x=stock_data.index.strftime('%Y-%m-%d').tolist(),
         y=stock_data['Volume'].tolist(),
         mode='lines',
         name='Volume',
@@ -133,16 +131,14 @@ def linear_regression_analysis(stock_data):
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(
-        x=stock_data.index.strftime('%Y-%m-%d').tolist()
-,
+        x=stock_data.index.strftime('%Y-%m-%d').tolist(),
         y=prices.tolist(),
         mode='lines',
         name='Price',
         line=dict(color='#2E86AB')
     ))
     fig.add_trace(go.Scatter(
-        x=stock_data.index.strftime('%Y-%m-%d').tolist()
-,
+        x=stock_data.index.strftime('%Y-%m-%d').tolist(),
         y=trend_line.tolist(),
         mode='lines',
         name='Trend Line',
@@ -262,9 +258,3 @@ def get_analysis(analysis_type):
             'error': str(e),
             'solution': 'Please try again with different parameters'
         }), 500
-
-# ========== MAIN ==========
-import os
-
-if __name__ == '__main__':
-    app.run(debug=False, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
